@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minuta de Pregoeiro</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      padding: 20px;
+      text-align: center;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: white;
+    }
+
+    .resultado-final {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .resultado-final p {
+      font-size: 1.2rem;
+      margin: 10px 0;
+      color: #2c3e50;
+    }
+    
+    #quiz-container, #menu-container {
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 800px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      color: #2c3e50;
+      transform: translateY(0);
+      transition: transform 0.3s ease;
+    }
+    
+    #menu-container:hover {
+      transform: translateY(-5px);
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .logo {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .menu-button, .opcao {
+      display: inline-block;
+      margin: 15px auto;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(45deg, #2193b0, #6dd5ed);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .menu-button:hover, .opcao:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      background: linear-gradient(45deg, #1c7aaf, #5bc8e3);
+    }
+    
+    .rules-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .rules-container ul {
+      list-style-type: none;
+      padding: 0;
+      text-align: center;
+    }
+    
+    .rules-container li {
+      margin: 10px 0;
+      font-size: 1.1rem;
+      color: #2c3e50;
+    }
+    
+    #pontuacao-maxima {
+      font-size: 1.2rem;
+      color: #2c3e50;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    
+    .sound-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    #resultado {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    #progresso {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: #2c3e50;
+    }
+
+    #enunciado {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <audio id="bgMusic" loop>
+    <source src="https://assets.mixkit.co/music/preview/mixkit-relaxing-in-nature-522.mp3" type="audio/mpeg">
+  </audio>
+  
+  <div class="sound-control" onclick="toggleMusic()">
+    <img id="soundIcon" src="https://cdn-icons-png.flaticon.com/512/727/727269.png" width="30" height="30" alt="Som">
+  </div>
+
+  <style>
+    /* Novo estilo para os créditos */
+    .credits {
+      font-family: 'Georgia', serif;
+      color: #2c3e50;
+      font-size: 1.1rem;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(44, 62, 80, 0.1);
+      font-style: italic;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .credits strong {
+      font-weight: 700;
+      color: #1c7aaf;
+    }
+    </style>
+
+    <div id="menu-container">
+      <img src="https://cdn-icons-png.flaticon.com/512/3500/3500833.png" alt="Logo Quiz" class="logo">
+      <h1>Minuta de Pregoeiro</h1>
+      <p style="font-size: 1.2rem; color: #34495e;">Teste seus conhecimentos sobre licitações!</p>
+      
+      <!-- Novo campo para nome do jogador -->
+      <div class="player-name-container">
+        <input type="text" id="playerName" placeholder="Digite seu nome" required>
+      </div>
+      
+      <div class="rules-container">
+        <h2 style="color: #2c3e50;">Regras do Jogo</h2>
+        <ul>
+          <li>🎯 Cada resposta correta vale 2 pontos</li>
+          <li>⚠️ Cada resposta errada subtrai 1 ponto</li>
+          <li>🎮 Responda todas as perguntas para completar o quiz</li>
+        </ul>
+      </div>
+      
+      <button class="menu-button" onclick="iniciarQuiz()">Iniciar Quiz</button>
+      <button class="menu-button" onclick="mostrarRanking()">Ver Ranking</button>
+      <div id="pontuacao-maxima"></div>
+      
+      <!-- Novo container para ranking -->
+      <div id="ranking-container" style="display: none;">
+        <h2>PREGOEIRO MASTER</h2>
+        <div id="ranking-list"></div>
+        <button class="menu-button" onclick="voltarMenu()">Voltar ao Menu</button>
+      </div>
+      
+      <!-- Adicionando os créditos -->
+      <div class="credits">Desenvolvido por <strong>EL² Incorporações</strong></div>
+    </div>
+  
+  <div id="quiz-container" style="display: none;">
+    <div id="pontuacao"></div>
+    <h2 id="enunciado"></h2>
+    <div id="opcoes">
+      <button class="opcao" id="opcao0"></button>
+      <button class="opcao" id="opcao1"></button>
+      <button class="opcao" id="opcao2"></button>
+      <button class="opcao" id="opcao3"></button>
+      <button class="opcao" id="opcao4"></button>
+    </div>
+    <div id="resultado"></div>
+    <div id="progresso"></div>
+  </div>
+
+  <script>
+    let pontuacao = 0;
+    let perguntaAtual = 0;
+    const perguntas = [
+      {
+        enunciado: "Qual é o prazo mínimo para apresentação das propostas ou lances, contado a partir do último aviso de publicação do edital?",
+        opcoes: [
+          "6 dias úteis",
+          "8 dias úteis", 
+          "10 dias úteis",
+          "15 dias úteis",
+          "30 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "De acordo com a Lei 14.133/2021, qual é o valor máximo para dispensa de licitação para compras?",
+        opcoes: [
+          "R$ 50.000,00",
+          "R$ 54.020,41",
+          "R$ 100.000,00",
+          "R$ 176.000,00",
+          "R$ 200.000,00"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual modo de disputa é caracterizado pela apresentação de lances públicos e sucessivos, crescentes ou decrescentes?",
+        opcoes: [
+          "Modo aberto",
+          "Modo fechado",
+          "Modo híbrido",
+          "Modo competitivo",
+          "Modo simultâneo"
+        ],
+        correta: 0
+      },
+      {
+        enunciado: "O que é o Portal Nacional de Contratações Públicas (PNCP)?",
+        opcoes: [
+          "Um site de notícias sobre licitações",
+          "O sítio eletrônico oficial para divulgação e realização das contratações",
+          "Um sistema de pagamento eletrônico",
+          "Um cadastro de fornecedores",
+          "Um banco de preços"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo mínimo de publicação do edital de licitação para serviços e compras de grande vulto?",
+        opcoes: [
+          "8 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "30 dias úteis",
+          "45 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é a matriz de riscos em uma licitação?",
+        opcoes: [
+          "Uma lista de fornecedores inadimplentes",
+          "Um documento que define a distribuição de riscos entre as partes",
+          "Um relatório de acidentes de trabalho",
+          "Uma análise de mercado",
+          "Um plano de contingência"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de pedido de esclarecimento do edital?",
+        opcoes: [
+          "Até 1 dia útil antes da abertura",
+          "Até 2 dias úteis antes da abertura",
+          "Até 3 dias úteis antes da abertura",
+          "Até 5 dias úteis antes da abertura",
+          "Até 8 dias úteis antes da abertura"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é o critério de julgamento pelo maior retorno econômico?",
+        opcoes: [
+          "Maior preço ofertado",
+          "Menor preço global",
+          "Maior desconto",
+          "Maior economia gerada para a Administração",
+          "Melhor técnica"
+        ],
+        correta: 3
+      },
+      {
+        enunciado: "Qual é o prazo máximo de vigência dos contratos de serviços e fornecimentos contínuos?",
+        opcoes: [
+          "12 meses",
+          "24 meses",
+          "36 meses",
+          "48 meses",
+          "60 meses"
+        ],
+        correta: 4
+      },
+      {
+        enunciado: "O que é o diálogo competitivo?",
+        opcoes: [
+          "Uma conversa informal com fornecedores",
+          "Uma modalidade de licitação para contratações complexas",
+          "Uma fase de negociação de preços",
+          "Um chat online com licitantes",
+          "Uma reunião presencial"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para envio da proposta no modo de disputa fechado?",
+        opcoes: [
+          "1 hora",
+          "2 horas",
+          "4 horas",
+          "6 horas",
+          "8 horas"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que caracteriza uma situação emergencial para dispensa de licitação?",
+        opcoes: [
+          "Falta de planejamento",
+          "Urgência de atendimento que possa ocasionar prejuízo ou risco",
+          "Preferência da administração",
+          "Valor baixo da contratação",
+          "Ausência de fornecedores"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação da documentação de habilitação no pregão?",
+        opcoes: [
+          "1 hora",
+          "2 horas",
+          "3 horas",
+          "4 horas",
+          "24 horas"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é a fase preparatória da licitação?",
+        opcoes: [
+          "A publicação do edital",
+          "O planejamento e elaboração dos documentos",
+          "A sessão pública",
+          "A homologação",
+          "A adjudicação"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para interposição de recurso contra a habilitação?",
+        opcoes: [
+          "2 dias úteis",
+          "3 dias úteis",
+          "5 dias úteis",
+          "8 dias úteis",
+          "10 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é o critério de julgamento por melhor técnica?",
+        opcoes: [
+          "Menor preço",
+          "Avaliação da qualidade técnica das propostas",
+          "Maior desconto",
+          "Maior lance",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo mínimo para publicação de aviso de licitação internacional?",
+        opcoes: [
+          "15 dias",
+          "30 dias",
+          "45 dias",
+          "60 dias",
+          "90 dias"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é a margem de preferência?",
+        opcoes: [
+          "Desconto oferecido",
+          "Vantagem competitiva para produtos nacionais",
+          "Prazo de entrega",
+          "Condição de pagamento",
+          "Garantia contratual"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de amostras no pregão?",
+        opcoes: [
+          "24 horas",
+          "2 dias úteis",
+          "3 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é o Sistema de Custos Referenciais de Obras (Sicro)?",
+        opcoes: [
+          "Um sistema de pagamentos",
+          "Uma tabela de preços para obras públicas",
+          "Um cadastro de construtoras",
+          "Um banco de projetos",
+          "Um sistema de fiscalização"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para análise de pedido de reequilíbrio econômico-financeiro?",
+        opcoes: [
+          "5 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "30 dias úteis",
+          "60 dias úteis"
+        ],
+        correta: 3
+      },
+      {
+        enunciado: "O que é a qualificação técnico-profissional?",
+        opcoes: [
+          "Registro na junta comercial",
+          "Capacidade dos profissionais vinculados à empresa",
+          "Atestado de capacidade técnica",
+          "Certificado de regularidade",
+          "Alvará de funcionamento"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para publicação do extrato do contrato?",
+        opcoes: [
+          "5 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "20 dias úteis",
+          "30 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é o critério de julgamento por maior lance?",
+        opcoes: [
+          "Menor preço",
+          "Utilizado em leilões",
+          "Maior desconto",
+          "Melhor técnica",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para resposta aos pedidos de esclarecimento?",
+        opcoes: [
+          "1 dia útil",
+          "2 dias úteis",
+          "3 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é a qualificação técnico-operacional?",
+        opcoes: [
+          "Registro profissional",
+          "Capacidade operacional da empresa",
+          "Certificado ISO",
+          "Alvará sanitário",
+          "Licença ambiental"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de garantia contratual?",
+        opcoes: [
+          "5 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "20 dias úteis",
+          "30 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é o critério de julgamento por melhor conteúdo artístico?",
+        opcoes: [
+          "Menor preço",
+          "Avaliação subjetiva de obras de arte",
+          "Maior desconto",
+          "Melhor técnica",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para emissão da ordem de serviço após a assinatura do contrato?",
+        opcoes: [
+          "5 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "20 dias úteis",
+          "30 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é a contratação integrada?",
+        opcoes: [
+          "Contratação de várias empresas",
+          "Regime de execução que inclui projeto e obra",
+          "Integração de sistemas",
+          "Consórcio de empresas",
+          "Subcontratação"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de cronograma físico-financeiro?",
+        opcoes: [
+          "5 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "20 dias úteis",
+          "30 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é o critério de julgamento por maior desconto?",
+        opcoes: [
+          "Menor preço",
+          "Maior percentual de desconto sobre preço fixado",
+          "Melhor técnica",
+          "Maior lance",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para substituição de produtos rejeitados?",
+        opcoes: [
+          "2 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é a contratação semi-integrada?",
+        opcoes: [
+          "Contratação parcial",
+          "Regime com projeto básico fornecido",
+          "Integração parcial",
+          "Subcontratação",
+          "Consórcio"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para análise de amostras?",
+        opcoes: [
+          "2 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é o critério de julgamento por melhor destinação de bens?",
+        opcoes: [
+          "Menor preço",
+          "Avaliação da destinação social dos bens",
+          "Maior desconto",
+          "Melhor técnica",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de plano de trabalho?",
+        opcoes: [
+          "5 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "20 dias úteis",
+          "30 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é a contratação por tarefa?",
+        opcoes: [
+          "Contratação por hora",
+          "Regime para mão de obra específica",
+          "Empreitada",
+          "Prestação de serviço",
+          "Fornecimento"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de composição de custos?",
+        opcoes: [
+          "24 horas",
+          "2 dias úteis",
+          "3 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é o critério de julgamento por técnica e preço?",
+        opcoes: [
+          "Menor preço",
+          "Combinação de avaliação técnica e preço",
+          "Maior desconto",
+          "Melhor técnica",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de planilha de formação de preços?",
+        opcoes: [
+          "24 horas",
+          "2 dias úteis",
+          "3 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é a empreitada por preço global?",
+        opcoes: [
+          "Pagamento por medição",
+          "Contratação por preço certo e total",
+          "Preço unitário",
+          "Tarefa",
+          "Administração contratada"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de documentos complementares?",
+        opcoes: [
+          "24 horas",
+          "2 dias úteis",
+          "3 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "O que é o critério de julgamento por menor preço?",
+        opcoes: [
+          "Maior desconto",
+          "Seleção da proposta com menor valor",
+          "Melhor técnica",
+          "Maior lance",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de catálogos?",
+        opcoes: [
+          "24 horas",
+          "2 dias úteis",
+          "3 dias úteis",
+          "5 dias úteis",
+          "7 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é a empreitada por preço unitário?",
+        opcoes: [
+          "Preço global",
+          "Contratação por unidade de medida",
+          "Tarefa",
+          "Administração contratada",
+          "Preço fixo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de laudos técnicos?",
+        opcoes: [
+          "5 dias úteis",
+          "7 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "20 dias úteis"
+        ],
+        correta: 2
+      },
+      {
+        enunciado: "O que é o critério de julgamento por maior oferta?",
+        opcoes: [
+          "Menor preço",
+          "Utilizado em alienação de bens",
+          "Maior desconto",
+          "Melhor técnica",
+          "Menor prazo"
+        ],
+        correta: 1
+      },
+      {
+        enunciado: "Qual é o prazo para apresentação de certificados?",
+        opcoes: [
+          "5 dias úteis",
+          "7 dias úteis",
+          "10 dias úteis",
+          "15 dias úteis",
+          "20 dias úteis"
+        ],
+        correta: 0
+      }
+    ];
+
+    function mostrarMenu() {
+      document.getElementById('menu-container').style.display = 'block';
+      document.getElementById('quiz-container').style.display = 'none';
+      const maxPontuacao = localStorage.getItem('maxPontuacao') || 0;
+      document.getElementById('pontuacao-maxima').textContent = `Pontuação Máxima: ${maxPontuacao}`;
+    }
+
+    function iniciarQuiz() {
+      pontuacao = 0;
+      perguntaAtual = 0;
+      document.getElementById('menu-container').style.display = 'none';
+      document.getElementById('quiz-container').style.display = 'block';
+      document.getElementById('pontuacao').textContent = `Pontuação: ${pontuacao}`;
+      mostrarPergunta();
+    }
+
+    function mostrarPergunta() {
+      if (perguntaAtual >= perguntas.length) {
+        const acertos = pontuacao / 2;
+        const erros = (perguntas.length - acertos);
+        
+        document.getElementById('quiz-container').innerHTML = `
+          <h2>Quiz Finalizado!</h2>
+          <div class="resultado-final">
+            <p>Sua pontuação final: ${pontuacao} pontos</p>
+            <p>✅ Acertos: ${acertos}</p>
+            <p>❌ Erros: ${erros}</p>
+          </div>
+          <button class="menu-button" onclick="voltarMenu()">Voltar ao Menu</button>
+        `;
+        
+        salvarPontuacao();
+        return;
+      }
+
+      const pergunta = perguntas[perguntaAtual];
+      document.getElementById('enunciado').innerHTML = `Questão ${perguntaAtual + 1}/${perguntas.length}: ${pergunta.enunciado}`;
+      
+      pergunta.opcoes.forEach((opcao, index) => {
+        const botao = document.getElementById(`opcao${index}`);
+        botao.textContent = opcao;
+        botao.onclick = () => verificarResposta(index);
+      });
+    }
+
+    function verificarResposta(resposta) {
+      const pergunta = perguntas[perguntaAtual];
+      const resultado = document.getElementById('resultado');
+      
+      if (resposta === pergunta.correta) {
+        pontuacao += 2;
+        resultado.textContent = "Correto! +2 pontos";
+        resultado.style.color = "#27ae60";
+      } else {
+        pontuacao = Math.max(0, pontuacao - 1);
+        resultado.textContent = "Incorreto! -1 ponto";
+        resultado.style.color = "#c0392b";
+      }
+      
+      document.getElementById('pontuacao').textContent = `Pontuação: ${pontuacao}`;
+      
+      setTimeout(() => {
+        resultado.textContent = "";
+        perguntaAtual++;
+        mostrarPergunta();
+      }, 1500);
+    }
+
+    // Função para salvar pontuação no ranking
+    function salvarPontuacao() {
+      const playerName = document.getElementById('playerName').value.trim() || 'Anônimo';
+      let ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+      
+      // Verifica se o jogador já existe no ranking
+      const jogadorExistente = ranking.findIndex(player => player.nome.toLowerCase() === playerName.toLowerCase());
+      
+      if (jogadorExistente !== -1) {
+        // Se o jogador já existe, atualiza apenas se a nova pontuação for maior
+        if (pontuacao > ranking[jogadorExistente].pontuacao) {
+          ranking[jogadorExistente].pontuacao = pontuacao;
+          ranking[jogadorExistente].data = new Date().toISOString();
+        }
+      } else {
+        // Se o jogador não existe, adiciona novo registro
+        ranking.push({
+          nome: playerName,
+          pontuacao: pontuacao,
+          data: new Date().toISOString()
+        });
+      }
+      
+      // Ordenar ranking por pontuação (maior para menor)
+      ranking.sort((a, b) => b.pontuacao - a.pontuacao || new Date(b.data) - new Date(a.data));
+      
+      // Manter apenas o melhor jogador
+      ranking = ranking.slice(0, 1);
+      
+      localStorage.setItem('ranking', JSON.stringify(ranking));
+    }
+
+    // Função para mostrar ranking
+    function mostrarRanking() {
+      document.getElementById('menu-container').style.display = 'block';
+      document.getElementById('quiz-container').style.display = 'none';
+      document.getElementById('ranking-container').style.display = 'block';
+      
+      const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+      const rankingList = document.getElementById('ranking-list');
+      rankingList.innerHTML = '';
+      
+      if (ranking.length === 0) {
+        rankingList.innerHTML = '<p style="color: #666;">Nenhuma pontuação registrada ainda!</p>';
+        return;
+      }
+      
+      ranking.forEach((player, index) => {
+        const playerElement = document.createElement('div');
+        playerElement.className = 'ranking-item';
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🎮';
+        playerElement.innerHTML = `
+          <span class="ranking-position">${medal} ${index + 1}º</span>
+          <span class="ranking-name">${player.nome}</span>
+          <span class="ranking-score">${player.pontuacao} pontos</span>
+        `;
+        rankingList.appendChild(playerElement);
+      });
+    }
+
+    // Função para voltar ao menu principal
+    function voltarMenu() {
+      document.getElementById('ranking-container').style.display = 'none';
+      mostrarMenu();
+    }
+
+    // Modificar a função finalizarQuiz para incluir salvamento no ranking
+    function finalizarQuiz() {
+      const maxPontuacao = Math.max(parseInt(localStorage.getItem('maxPontuacao') || 0), pontuacao);
+      localStorage.setItem('maxPontuacao', maxPontuacao);
+      
+      // Salvar pontuação no ranking
+      salvarPontuacao();
+      
+      document.getElementById('quiz-container').innerHTML = `
+        <h2>Quiz Finalizado!</h2>
+        <p>Sua pontuação: ${pontuacao}</p>
+        <p>Pontuação máxima: ${maxPontuacao}</p>
+        <button class="menu-button" onclick="mostrarMenu()">Voltar ao Menu</button>
+        <button class="menu-button" onclick="mostrarRanking()">Ver Ranking</button>
+      `;
+    }
+
+    // Adicionar estilos CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      .player-name-container {
+        margin: 20px 0;
+      }
+      
+      #playerName {
+        padding: 10px;
+        font-size: 1.1rem;
+        border: 2px solid #2c3e50;
+        border-radius: 5px;
+        width: 100%;
+        max-width: 300px;
+      }
+      
+      .ranking-item {
+        background: rgba(44, 62, 80, 0.1);
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .ranking-position {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 1.2rem;
+      }
+      
+      .ranking-name {
+        flex-grow: 1;
+        margin: 0 15px;
+        color: #2c3e50;
+      }
+      
+      .ranking-score {
+        color: #27ae60;
+        font-weight: bold;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // ... existing code ...
+</script>
+
+<script>
+    function finalizarQuiz() {
+      const maxPontuacao = Math.max(parseInt(localStorage.getItem('maxPontuacao') || 0), pontuacao);
+      localStorage.setItem('maxPontuacao', maxPontuacao);
+      
+      document.getElementById('quiz-container').innerHTML = `
+        <h2>Quiz Finalizado!</h2>
+        <p>Sua pontuação: ${pontuacao}</p>
+        <p>Pontuação máxima: ${maxPontuacao}</p>
+        <button class="menu-button" onclick="mostrarMenu()">Voltar ao Menu</button>
+        <button class="menu-button" onclick="mostrarRanking()">Ver Ranking</button>
+      `;
+    }
+
+    // Adicionar estilos CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      .player-name-container {
+        margin: 20px 0;
+      }
+      
+      #playerName {
+        padding: 10px;
+        font-size: 1.1rem;
+        border: 2px solid #2c3e50;
+        border-radius: 5px;
+        width: 100%;
+        max-width: 300px;
+      }
+      
+      .ranking-item {
+        background: rgba(44, 62, 80, 0.1);
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .ranking-position {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 1.2rem;
+      }
+      
+      .ranking-name {
+        flex-grow: 1;
+        margin: 0 15px;
+        color: #2c3e50;
+      }
+      
+      .ranking-score {
+        color: #27ae60;
+        font-weight: bold;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // ... existing code ...
+</script>
+</body>
+</html>
